@@ -2090,8 +2090,8 @@ class MiniBatchKMeans(_BaseKMeans):
             Fitted estimator.
         """
         if self.spherical:
-            assert isinstance(X, np.array)
-            X = X / np.linalg.norm(X, dim=1, keepdims=True)
+            assert isinstance(X, np.ndarray)
+            X = X / np.linalg.norm(X, axis=1, keepdims=True)
 
         X = self._validate_data(
             X,
@@ -2155,8 +2155,8 @@ class MiniBatchKMeans(_BaseKMeans):
                 best_inertia = inertia
 
         centers = init_centers
-        if spherical:
-            centers = centers / np.linalg.norm(centers, dim=1, keepdims=True)
+        if self.spherical:
+            centers = centers / np.linalg.norm(centers, axis=1, keepdims=True)
         centers_new = np.empty_like(centers)
 
         # Initialize counts
@@ -2199,7 +2199,7 @@ class MiniBatchKMeans(_BaseKMeans):
 
                 centers, centers_new = centers_new, centers
                 if self.spherical:
-                    centers = centers / np.linalg.norm(centers, dim=1, keepdims=True)
+                    centers = centers / np.linalg.norm(centers, axis=1, keepdims=True)
 
                 # Monitor convergence and do early stopping if necessary
                 if self._mini_batch_convergence(
