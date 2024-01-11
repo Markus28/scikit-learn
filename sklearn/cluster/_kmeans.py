@@ -1919,6 +1919,7 @@ class MiniBatchKMeans(_BaseKMeans):
         init_size=None,
         n_init="auto",
         reassignment_ratio=0.01,
+        spherical=False,
     ):
         super().__init__(
             n_clusters=n_clusters,
@@ -1935,6 +1936,7 @@ class MiniBatchKMeans(_BaseKMeans):
         self.compute_labels = compute_labels
         self.init_size = init_size
         self.reassignment_ratio = reassignment_ratio
+        self.spherical = spherical
 
     def _check_params_vs_input(self, X):
         super()._check_params_vs_input(X, default_n_init=3)
@@ -2087,6 +2089,10 @@ class MiniBatchKMeans(_BaseKMeans):
         self : object
             Fitted estimator.
         """
+        if self.spherical:
+            assert isinstance(X, np.array)
+            X = X / np.linalg.norm(X, dim=1, keepdims=True)
+
         X = self._validate_data(
             X,
             accept_sparse="csr",
@@ -2149,6 +2155,8 @@ class MiniBatchKMeans(_BaseKMeans):
                 best_inertia = inertia
 
         centers = init_centers
+        if spherical:
+            centers = centers / np.linalg.norm(centers, dim=1, keepdims=True)
         centers_new = np.empty_like(centers)
 
         # Initialize counts
@@ -2190,6 +2198,8 @@ class MiniBatchKMeans(_BaseKMeans):
                     centers_squared_diff = 0
 
                 centers, centers_new = centers_new, centers
+                if self.spherical:
+                    centers = centers / np.linalg.norm(centers, dim=1, keepdims=True)
 
                 # Monitor convergence and do early stopping if necessary
                 if self._mini_batch_convergence(
